@@ -4,23 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>מעקב לוטו</title>
-<link rel="manifest" id="pwaManifest">
-<link rel="apple-touch-icon" id="appleIcon">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="לוטו">
 <meta name="theme-color" content="#f59e0b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script>
-(function(){
-  function makeIcon(e,s){const c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.beginPath();x.arc(s/2,s/2,s/2,0,Math.PI*2);x.fillStyle='#0a0e14';x.fill();x.font=`${s*0.55}px serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(e,s/2,s/2);return c.toDataURL('image/png').split(',')[1];}
-  const i192=makeIcon('🎰',192),i512=makeIcon('🎰',512);
-  document.getElementById('appleIcon').href='data:image/png;base64,'+i512;
-  const m=JSON.stringify({name:'מעקב לוטו',short_name:'לוטו',description:'מעקב הוצאות ורווחים בלוטו',start_url:'./',display:'standalone',background_color:'#0a0e14',theme_color:'#f59e0b',orientation:'portrait',icons:[{src:'data:image/png;base64,'+i192,sizes:'192x192',type:'image/png'},{src:'data:image/png;base64,'+i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]});
-  document.getElementById('pwaManifest').href=URL.createObjectURL(new Blob([m],{type:'application/json'}));
-})();
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0a0e14;--sf:#131820;--sf2:#1c2330;--sf3:#242d3b;--bd:#2a3547;--ac:#f59e0b;--ac2:#3b82f6;--ac3:#00c896;--ac4:#ec4899;--tx:#e2eaf4;--tx2:#8899b0;--tx3:#5c6e84;--er:#ef4444;--ok:#22c55e;--r:14px;--rs:9px;--fn:'Heebo',sans-serif;--bnav-h:64px}

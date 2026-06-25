@@ -1,0 +1,14 @@
+{
+  "name": "מעקב לוטו",
+  "short_name": "לוטו",
+  "description": "מעקב הוצאות ורווחים בלוטו",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
