@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>מעקב לוטו</title>
+<link rel="manifest" id="pwaManifest">
+<link rel="apple-touch-icon" id="appleIcon">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="לוטו">
+<meta name="theme-color" content="#f59e0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+(function(){
+  function makeIcon(e,s){const c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.beginPath();x.arc(s/2,s/2,s/2,0,Math.PI*2);x.fillStyle='#0a0e14';x.fill();x.font=`${s*0.55}px serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(e,s/2,s/2);return c.toDataURL('image/png').split(',')[1];}
+  const i192=makeIcon('🎰',192),i512=makeIcon('🎰',512);
+  document.getElementById('appleIcon').href='data:image/png;base64,'+i512;
+  const m=JSON.stringify({name:'מעקב לוטו',short_name:'לוטו',description:'מעקב הוצאות ורווחים בלוטו',start_url:'./',display:'standalone',background_color:'#0a0e14',theme_color:'#f59e0b',orientation:'portrait',icons:[{src:'data:image/png;base64,'+i192,sizes:'192x192',type:'image/png'},{src:'data:image/png;base64,'+i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]});
+  document.getElementById('pwaManifest').href=URL.createObjectURL(new Blob([m],{type:'application/json'}));
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e14;--sf:#131820;--sf2:#1c2330;--sf3:#242d3b;--bd:#2a3547;--ac:#f59e0b;--ac2:#3b82f6;--ac3:#00c896;--ac4:#ec4899;--tx:#e2eaf4;--tx2:#8899b0;--tx3:#5c6e84;--er:#ef4444;--ok:#22c55e;--r:14px;--rs:9px;--fn:'Heebo',sans-serif;--bnav-h:64px}
+body.light{--bg:#f0f4f8;--sf:#fff;--sf2:#e8eef5;--sf3:#dde5ee;--bd:#c8d5e3;--tx:#1a2332;--tx2:#4a5e74;--tx3:#7a92a8;--er:#dc2626;--ok:#16a34a}
+body.light input,body.light select{color-scheme:light}
+body.light select option{background:#e8eef5}
+body.light input[type=date]{color-scheme:light}
+html,body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fn)}
+.hdr{background:linear-gradient(160deg,#0d1522,#131820);border-bottom:1px solid var(--bd);padding:14px 16px 0;position:sticky;top:0;z-index:200}
+body.light .hdr{background:linear-gradient(160deg,#dde5ee,#e8eef5)!important}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.hdr-title{font-size:1.1rem;font-weight:800;color:var(--tx);display:flex;align-items:center;gap:8px}
+.hdr-actions{display:flex;gap:6px;align-items:center}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:9px 14px;font-size:.85rem;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;font-family:var(--fn)}
+.tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s}
+.tab.active{color:var(--ac)}.tab.active::after{transform:scaleX(1)}
+.bnav{display:none}
+@media(max-width:899px){
+  .bnav{display:flex;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;height:var(--bnav-h);background:var(--sf);border-top:1px solid var(--bd);z-index:250;padding:0 8px;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .hdr .tabs{display:none}
+  .wrap{padding-bottom:calc(var(--bnav-h) + 20px)!important}
+  .toast{bottom:calc(var(--bnav-h) + 10px)}
+}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;background:none;border:none;cursor:pointer;color:var(--tx3);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 4px;transition:color .18s;font-family:var(--fn)}
+.bnav-btn.active{color:var(--ac)}
+.bnav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bnav-plus{flex:0 0 56px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#d97706);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(245,158,11,.4);margin-bottom:12px;transform:translateY(-6px);transition:transform .15s;color:#0a0000;font-size:1.5rem}
+.bnav-plus:active{transform:translateY(-4px) scale(.95)}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+@media(min-width:900px){body{display:flex;flex-direction:column}.app-layout{display:flex;flex:1;align-items:flex-start;max-width:1300px;margin:0 auto;width:100%}.wrap{max-width:1100px;padding:20px 24px;flex:1;min-width:0}}
+.tc{display:none}.tc.active{display:block}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.ct{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx2);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.ctb{width:3px;height:12px;background:var(--ac);border-radius:2px;flex-shrink:0}
+.ctb.blue{background:var(--ac2)}.ctb.green{background:var(--ac3)}.ctb.red{background:var(--er)}.ctb.pink{background:var(--ac4)}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi-grid.four{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:600px){.kpi-grid.four{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.kpi-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--tx2);margin-bottom:6px}
+.kpi-val{font-size:1.35rem;font-weight:800;color:var(--tx)}
+.kpi-val.green{color:var(--ok)}.kpi-val.red{color:var(--er)}.kpi-val.yellow{color:var(--ac)}.kpi-val.blue{color:var(--ac2)}
+.kpi-sub{font-size:.72rem;color:var(--tx3);margin-top:3px}
+.f{margin-bottom:12px}.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f label{display:block;font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:5px}
+.hint{font-size:.72rem;color:var(--tx2);margin-top:3px}
+input,select{width:100%;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-family:var(--fn);font-size:1.05rem;font-weight:500;padding:12px 13px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+input[type=date]{color-scheme:dark}
+select option{background:#1c2330}
+.btn{width:100%;background:linear-gradient(135deg,var(--ac),#d97706);border:none;border-radius:var(--r);color:#061410;font-size:.95rem;font-weight:800;padding:14px;cursor:pointer;transition:opacity .2s,transform .1s;font-family:var(--fn)}
+.btn:active{transform:scale(.98);opacity:.9}
+.gbtn{background:transparent;border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-size:.75rem;font-weight:600;padding:7px 13px;cursor:pointer;transition:all .2s;width:auto;font-family:var(--fn)}
+.gbtn:hover{border-color:var(--ac2);color:var(--ac2)}
+.gbtn.d:hover{border-color:var(--er);color:var(--er)}
+.gbtn.g:hover{border-color:var(--ac);color:var(--ac)}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.mov.open{display:flex}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:580px;padding:20px;animation:su .28s ease;max-height:92vh;overflow-y:auto}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:1rem;font-weight:800;color:var(--tx)}
+.close-btn{background:none;border:none;color:var(--tx3);font-size:1.3rem;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s}
+.close-btn:hover{background:var(--sf2)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sf);border:1px solid var(--ok);border-radius:var(--r);color:var(--ok);font-size:.82rem;font-weight:600;padding:11px 22px;z-index:999;transition:transform .28s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.e{border-color:var(--er);color:var(--er)}
+.toast.w{border-color:var(--ac3);color:var(--ac3)}
+.nums-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.num-ball{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--bd);background:var(--sf2);color:var(--tx2);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none}
+.num-ball.sel{background:var(--ac);border-color:var(--ac);color:#061410}
+.num-ball.hit{background:var(--ok);border-color:var(--ok);color:#fff}
+.num-ball.strong{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:#7c3aed;color:#fff}
+.num-ball.strong.sel{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:#a78bfa}
+.balls-label{font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:4px;margin-top:10px}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{padding:9px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--sf2)}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;background:var(--sf2);border-radius:var(--rs);margin-bottom:4px;font-weight:700;font-size:.88rem;color:var(--tx);border:1px solid var(--bd);transition:background .2s}
+.acc-header:hover{background:var(--sf3)}
+.acc-arrow{transition:transform .25s;color:var(--tx3)}
+.acc-body{display:none;padding:0 2px 8px}.acc-body.open{display:block}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters select{width:auto;padding:8px 12px;font-size:.82rem}
+.b-inline{display:inline-flex;gap:3px;flex-wrap:wrap;align-items:center}
+.b-sm{width:24px;height:24px;border-radius:50%;font-size:.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;background:var(--sf3);color:var(--tx2);border:1px solid var(--bd)}
+.b-sm.hit{background:var(--ok);color:#fff;border-color:var(--ok)}
+.b-sm.strong-ball{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:#7c3aed}
+.b-sm.strong-hit{background:linear-gradient(135deg,#f59e0b,#d97706);color:#061410;border-color:#f59e0b}
+.lrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.divl{height:1px;background:var(--bd);margin:12px 0}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:.7rem;font-weight:700;gap:4px}
+.badge.green{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.3)}
+.badge.red{background:rgba(239,68,68,.12);color:var(--er);border:1px solid rgba(239,68,68,.3)}
+.badge.yellow{background:rgba(245,158,11,.12);color:var(--ac);border:1px solid rgba(245,158,11,.3)}
+.badge.blue{background:rgba(59,130,246,.12);color:var(--ac2);border:1px solid rgba(59,130,246,.3)}
+.empty-msg{text-align:center;color:var(--tx3);font-size:.88rem;padding:32px 16px}
+.row-card{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;position:relative}
+.row-num{font-size:.72rem;font-weight:800;color:var(--tx3);margin-bottom:8px}
+.row-del{position:absolute;top:8px;left:8px;background:none;border:none;color:var(--er);cursor:pointer;font-size:1rem;opacity:.6;transition:opacity .2s}
+.row-del:hover{opacity:1}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">🎰 מעקב לוטו</div>
+    <div class="hdr-actions">
+      <button id="installBtn" onclick="promptInstall()" style="display:none;background:var(--ac);border:none;border-radius:var(--rs);color:#061410;font-family:var(--fn);font-size:.8rem;font-weight:700;padding:7px 12px;cursor:pointer">📱 התקן</button>
+      <button onclick="toggleTheme()" style="background:none;border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.8rem;padding:6px 10px;cursor:pointer" id="themeBtn">🌙</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard',this)">📊 סיכום</button>
+    <button class="tab" onclick="switchTab('add',this)">➕ הגרלה</button>
+    <button class="tab" onclick="switchTab('history',this)">📋 היסטוריה</button>
+    <button class="tab" onclick="switchTab('charity',this)">🤲 צדקה</button>
+  </div>
+</div>
+
+<div class="app-layout">
+<div class="wrap">
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tc active">
+  <div class="kpi-grid four" id="kpiGrid"></div>
+  <div class="kpi-grid" id="kpiGrid2"></div>
+  <div class="card" id="summaryCard"></div>
+</div>
+
+<!-- ADD -->
+<div id="tab-add" class="tc">
+  <div class="card">
+    <div class="ct"><span class="ctb"></span>הוספת הגרלה חדשה</div>
+    <div class="fr">
+      <div class="f"><label>תאריך הגרלה</label><input type="date" id="addDate"></div>
+      <div class="f"><label>מספר הגרלה</label><input type="number" id="addDrawNum" placeholder="רשות"></div>
+    </div>
+    <div class="divl"></div>
+    <div class="ct" style="margin-bottom:10px"><span class="ctb blue"></span>שורות טופס (עד 14)</div>
+    <div id="rowsContainer"></div>
+    <button class="gbtn g" onclick="addRow()" style="width:100%;margin-bottom:12px;padding:10px">➕ הוסף שורה</button>
+    <button class="btn" onclick="saveEntry()">💾 שמור הגרלה</button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="tab-history" class="tc">
+  <div class="card">
+    <div class="filters">
+      <select id="hYear" onchange="renderHistory()"><option value="">כל השנים</option></select>
+      <select id="hMonth" onchange="renderHistory()"><option value="">כל החודשים</option></select>
+      <select id="hSort" onchange="renderHistory()">
+        <option value="date-desc">תאריך ↓</option>
+        <option value="date-asc">תאריך ↑</option>
+        <option value="cost-desc">עלות ↓</option>
+        <option value="profit-desc">רווח ↓</option>
+      </select>
+    </div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- CHARITY -->
+<div id="tab-charity" class="tc">
+  <div class="kpi-grid" id="charityKpi"></div>
+  <div class="card">
+    <div class="ct"><span class="ctb pink"></span>פירוט תרומות לצדקה</div>
+    <div class="filters">
+      <select id="cYear" onchange="renderCharity()"><option value="">כל השנים</option></select>
+      <select id="cMonth" onchange="renderCharity()"><option value="">כל החודשים</option></select>
+    </div>
+    <div id="charityList"></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-btn active" id="bn-dashboard" onclick="switchTab('dashboard',this,'bn')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    סיכום
+  </button>
+  <button class="bnav-btn" id="bn-history" onclick="switchTab('history',this,'bn')">
+    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+    היסטוריה
+  </button>
+  <button class="bnav-plus" onclick="switchTab('add',null,'plus')">➕</button>
+  <button class="bnav-btn" id="bn-charity" onclick="switchTab('charity',this,'bn')">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    צדקה
+  </button>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="mov" id="detailMov" onclick="if(event.target===this)closeDetail()">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<!-- EDIT DRAW MODAL -->
+<div class="mov" id="editDrawMov" onclick="if(event.target===this)closeEditDraw()">
+  <div class="modal" id="editDrawModal"></div>
+</div>
+
+<!-- DUPLICATE DATE MODAL -->
+<div class="mov" id="dupMov" onclick="if(event.target===this)closeDup()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hdr"><div class="modal-title">📋 שכפול כרטיס</div><button class="close-btn" onclick="closeDup()">✕</button></div>
+    <div class="f"><label>תאריך חדש להגרלה</label><input type="date" id="dupDate"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" style="flex:1" onclick="confirmDup()">שכפל</button>
+      <button class="gbtn" style="flex:1;padding:14px" onclick="closeDup()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div class="mov" id="backupMov" onclick="if(event.target===this)closeBackup()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr"><div class="modal-title">💾 גיבוי ושחזור</div><button class="close-btn" onclick="closeBackup()">✕</button></div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn" style="flex:1;font-size:.85rem;padding:12px" onclick="exportBackup()">📤 ייצא גיבוי</button>
+      <button class="btn" style="flex:1;font-size:.85rem;padding:12px;background:linear-gradient(135deg,var(--ac2),#1d4ed8)" onclick="document.getElementById('importFile').click()">📥 ייבא גיבוי</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(this)">
+    <div style="font-size:.78rem;color:var(--tx3);line-height:1.6">
+      <strong style="color:var(--tx2)">ייצוא:</strong> שומר קובץ JSON עם כל הנתונים.<br>
+      <strong style="color:var(--tx2)">ייבוא:</strong> טוען קובץ גיבוי — <span style="color:var(--er)">מחליף את הנתונים הקיימים.</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;max-width:320px;width:90%;text-align:center;">
+    <div id="confirmMsg" style="font-size:.95rem;color:var(--tx);margin-bottom:20px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="confirmNo" style="flex:1;padding:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx2);border-radius:8px;cursor:pointer;font-family:var(--fn)">ביטול</button>
+      <button id="confirmYes" style="flex:1;padding:10px;border:none;background:var(--er);color:#fff;border-radius:8px;font-weight:700;cursor:pointer;font-family:var(--fn)">אישור</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const SK = 'lotto_tracker_v2';
+const TICKET_PRICE = 3;       // ₪3 לשורה
+const CHARITY_WIN_RATIO = 0.2; // 20% מרווח לצדקה
+// צדקה מטופס = עלות הטופס המלאה (100%)
+
+const MONTHS_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+let entries = [];
+function load(){ try{ entries=JSON.parse(localStorage.getItem(SK)||'[]') }catch(e){ entries=[] } }
+function save(){ localStorage.setItem(SK,JSON.stringify(entries)) }
+
+// ─── RECALC ENTRY (after editing draw nums or prize) ─────────────────────────
+function recalcEntry(e){
+  let totalWin=0;
+  e.rows=e.rows.map(r=>{
+    const hReg=e.drawNums.length===6?r.nums.filter(n=>e.drawNums.includes(n)):[];
+    const hStr=e.drawStrong!==null&&r.strong!==null&&r.strong===e.drawStrong;
+    // if manual prize is set, use it; otherwise auto-calc
+    const prize = r.manualPrize!==undefined ? r.manualPrize : calcWin(hReg.length,hStr);
+    totalWin+=prize;
+    return{...r,hits:hReg.length,strongHit:hStr,prize};
+  });
+  e.totalWin=totalWin;
+  e.charityFromWin=totalWin*CHARITY_WIN_RATIO;
+  e.netWin=totalWin-e.charityFromWin;
+  e.totalCharity=e.charityFromCost+e.charityFromWin;
+}
+
+// ─── PWA ──────────────────────────────────────────────────────────────────────
+let _dip=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;const b=document.getElementById('installBtn');if(b)b.style.display='block';});
+async function promptInstall(){if(!_dip)return;_dip.prompt();const{outcome}=await _dip.userChoice;_dip=null;if(outcome==='accepted')document.getElementById('installBtn').style.display='none';}
+window.addEventListener('appinstalled',()=>{_dip=null;const b=document.getElementById('installBtn');if(b)b.style.display='none';});
+if(/iP(hone|ad|od)/.test(navigator.userAgent)&&!window.MSStream&&!window.navigator.standalone){
+  setTimeout(()=>{const b=document.createElement('div');b.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 16px;font-size:.82rem;color:var(--tx);z-index:500;max-width:300px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);font-family:var(--fn)';b.innerHTML='📲 להתקנה: לחץ <strong>שתף</strong> ← <strong>"הוסף למסך הבית"</strong><br><button onclick="this.parentElement.remove()" style="margin-top:8px;background:none;border:1px solid var(--bd);color:var(--tx2);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:var(--fn)">סגור</button>';document.body.appendChild(b);setTimeout(()=>b.remove(),10000);},1500);
+}
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function setTheme(m){document.body.classList.toggle('light',m==='light');localStorage.setItem('lotto_theme',m);document.getElementById('themeBtn').textContent=m==='light'?'🌙':'☀️';}
+function toggleTheme(){setTheme(document.body.classList.contains('light')?'dark':'light');}
+(function(){setTheme(localStorage.getItem('lotto_theme')||'dark');})();
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';setTimeout(()=>el.classList.remove('show'),2800);}
+
+// ─── CONFIRM ──────────────────────────────────────────────────────────────────
+function confirmAsync(msg){
+  return new Promise(resolve=>{
+    const modal=document.getElementById('confirmModal');
+    document.getElementById('confirmMsg').innerHTML=msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    modal.style.display='flex';
+    const yes=document.getElementById('confirmYes'),no=document.getElementById('confirmNo');
+    const done=v=>{modal.style.display='none';yes.onclick=null;no.onclick=null;resolve(v);};
+    yes.onclick=()=>done(true);no.onclick=()=>done(false);
+  });
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name,btn,type){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab,.bnav-btn').forEach(t=>t.classList.remove('active'));
+  if(type==='bn'&&btn) btn.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+name+"'"))t.classList.add('active');});
+  if(name==='dashboard') renderDashboard();
+  if(name==='history')   renderHistory();
+  if(name==='charity')   renderCharity();
+  if(name==='add')       initAddForm();
+}
+
+// ─── ROW MANAGEMENT ───────────────────────────────────────────────────────────
+let rows=[];
+
+function initAddForm(){
+  const d=document.getElementById('addDate');
+  if(!d.value) d.value=new Date().toISOString().slice(0,10);
+  rows=[{nums:[],strong:null}];
+  renderRows();
+}
+
+function addRow(){if(rows.length>=14){toast('⚠️ עד 14 שורות','w');return}rows.push({nums:[],strong:null});renderRows();}
+function removeRow(i){if(rows.length<=1){toast('⚠️ חובה שורה אחת לפחות','w');return}rows.splice(i,1);renderRows();}
+
+function renderRows(){
+  const c=document.getElementById('rowsContainer');
+  c.innerHTML='';
+  rows.forEach((row,ri)=>{
+    const div=document.createElement('div');
+    div.className='row-card';div.style.animation='fi .2s ease';
+    div.innerHTML=`
+      <button class="row-del" onclick="removeRow(${ri})" title="מחק שורה">✕</button>
+      <div class="row-num">שורה ${ri+1}</div>
+      <div class="balls-label">בחר 6 מספרים (1–37):</div>
+      <div class="nums-grid" id="row-${ri}-nums"></div>
+      <div class="balls-label">מספר חזק (1–7):</div>
+      <div class="nums-grid" id="row-${ri}-strong"></div>
+    `;
+    c.appendChild(div);
+    // 1–37
+    const g37=document.getElementById(`row-${ri}-nums`);
+    for(let i=1;i<=37;i++){
+      const b=document.createElement('div');
+      b.className='num-ball'+(row.nums.includes(i)?' sel':'');
+      b.textContent=i;
+      b.onclick=()=>{
+        const idx=row.nums.indexOf(i);
+        if(idx>=0){row.nums.splice(idx,1);b.classList.remove('sel')}
+        else if(row.nums.length<6){row.nums.push(i);b.classList.add('sel')}
+        else toast('⚠️ עד 6 מספרים בשורה','w');
+      };
+      g37.appendChild(b);
+    }
+    // 1–7
+    const g7=document.getElementById(`row-${ri}-strong`);
+    for(let i=1;i<=7;i++){
+      const b=document.createElement('div');
+      b.className='num-ball strong'+(row.strong===i?' sel':'');
+      b.textContent=i;
+      b.onclick=()=>{
+        if(row.strong===i){row.strong=null;b.classList.remove('sel')}
+        else{document.querySelectorAll(`#row-${ri}-strong .num-ball`).forEach(x=>x.classList.remove('sel'));row.strong=i;b.classList.add('sel');}
+      };
+      g7.appendChild(b);
+    }
+  });
+}
+
+// ─── WIN CALC ─────────────────────────────────────────────────────────────────
+function calcWin(hits,strongHit){
+  if(hits===5&&strongHit)  return 100000;
+  if(hits===5)             return 5000;
+  if(hits===4&&strongHit)  return 500;
+  if(hits===4)             return 100;
+  if(hits===3&&strongHit)  return 50;
+  if(hits===3)             return 10;
+  if(hits===2&&strongHit)  return 5;
+  return 0;
+  // 6 hits = jackpot → user enters prize manually
+}
+
+// ─── SAVE ENTRY ───────────────────────────────────────────────────────────────
+function saveEntry(){
+  const date=document.getElementById('addDate').value;
+  if(!date){toast('❌ בחר תאריך','e');return}
+  for(let i=0;i<rows.length;i++){
+    if(rows[i].nums.length!==6){toast(`❌ שורה ${i+1}: בחר 6 מספרים`,'e');return}
+    if(rows[i].strong===null){toast(`❌ שורה ${i+1}: בחר מספר חזק`,'e');return}
+  }
+  const numRows=rows.length;
+  const totalCost=numRows*TICKET_PRICE;
+  const charityFromCost=totalCost; // 100% מהטופס לצדקה
+  const rowResults=rows.map(r=>({nums:[...r.nums],strong:r.strong,hits:0,strongHit:false,prize:0}));
+  const entry={
+    id:Date.now(),date,
+    drawNum:document.getElementById('addDrawNum').value||null,
+    drawNums:[],drawStrong:null, // יוזן אחרי ההגרלה
+    rows:rowResults,
+    totalCost,totalWin:0,netWin:0,
+    charityFromCost,charityFromWin:0,
+    totalCharity:charityFromCost
+  };
+  entries.unshift(entry);
+  save();
+  toast('✅ הגרלה נשמרה');
+  document.getElementById('addDate').value='';
+  document.getElementById('addDrawNum').value='';
+  rows=[{nums:[],strong:null}];
+  renderRows();
+  setTimeout(()=>switchTab('history',null),600);
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n){return n.toLocaleString('he-IL',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtDate(d){const p=d.split('-');return `${p[2]}/${p[1]}/${p[0]}`}
+function getYear(d){return d.slice(0,4)}
+function getMonth(d){return parseInt(d.slice(5,7))}
+function getFilteredEntries(y,m){return entries.filter(e=>{if(y&&getYear(e.date)!==y)return false;if(m&&getMonth(e.date)!==parseInt(m))return false;return true;})}
+function populateYearFilter(id){const sel=document.getElementById(id);const cur=sel.value;const years=[...new Set(entries.map(e=>getYear(e.date)))].sort().reverse();sel.innerHTML='<option value="">כל השנים</option>';years.forEach(y=>sel.innerHTML+=`<option value="${y}"${cur===y?' selected':''}>${y}</option>`);}
+function populateMonthFilter(id){const sel=document.getElementById(id);const cur=sel.value;sel.innerHTML='<option value="">כל החודשים</option>';MONTHS_HE.forEach((m,i)=>sel.innerHTML+=`<option value="${i+1}"${cur==i+1?' selected':''}>${m}</option>`);}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const totalCost=entries.reduce((s,e)=>s+e.totalCost,0);
+  const totalWin=entries.reduce((s,e)=>s+e.totalWin,0);
+  const totalCharity=entries.reduce((s,e)=>s+e.totalCharity,0);
+  const netProfit=totalWin-totalCost;
+  const totalRows=entries.reduce((s,e)=>s+e.rows.length,0);
+  const charityFromCost=entries.reduce((s,e)=>s+e.charityFromCost,0);
+  const charityFromWin=entries.reduce((s,e)=>s+e.charityFromWin,0);
+
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="kpi-label">סה"כ הוצאות</div><div class="kpi-val red">₪${fmt(totalCost)}</div><div class="kpi-sub">${totalRows} שורות · ${entries.length} הגרלות</div></div>
+    <div class="kpi"><div class="kpi-label">סה"כ רווחים</div><div class="kpi-val green">₪${fmt(totalWin)}</div><div class="kpi-sub">ברוטו</div></div>
+    <div class="kpi"><div class="kpi-label">רווח/הפסד נטו</div><div class="kpi-val ${netProfit>=0?'green':'red'}">₪${fmt(netProfit)}</div><div class="kpi-sub">אחרי הוצאות</div></div>
+    <div class="kpi"><div class="kpi-label">סה"כ לצדקה</div><div class="kpi-val yellow">₪${fmt(totalCharity)}</div><div class="kpi-sub">מחויב</div></div>`;
+  document.getElementById('kpiGrid2').innerHTML=`
+    <div class="kpi"><div class="kpi-label">צדקה מטפסים</div><div class="kpi-val blue">₪${fmt(charityFromCost)}</div><div class="kpi-sub">100% מעלות</div></div>
+    <div class="kpi"><div class="kpi-label">צדקה מרווחים</div><div class="kpi-val" style="color:var(--ac4)">₪${fmt(charityFromWin)}</div><div class="kpi-sub">20% מזכייה</div></div>`;
+
+  const byMonth={};
+  entries.forEach(e=>{const k=e.date.slice(0,7);if(!byMonth[k])byMonth[k]={cost:0,win:0,charity:0,count:0};byMonth[k].cost+=e.totalCost;byMonth[k].win+=e.totalWin;byMonth[k].charity+=e.totalCharity;byMonth[k].count++;});
+  const sortedKeys=Object.keys(byMonth).sort().reverse();
+  let html='<div class="ct"><span class="ctb green"></span>סיכום חודשי</div>';
+  if(!sortedKeys.length){html+='<div class="empty-msg">אין נתונים עדיין</div>';}
+  else{
+    html+=`<div class="tbl-wrap"><table><tr><th>חודש</th><th>הגרלות</th><th>הוצאות</th><th>רווחים</th><th>נטו</th><th>צדקה</th></tr>`;
+    sortedKeys.forEach(k=>{const m=byMonth[k];const net=m.win-m.cost;const[y,mo]=k.split('-');html+=`<tr><td>${MONTHS_HE[parseInt(mo)-1]} ${y}</td><td>${m.count}</td><td style="color:var(--er)">₪${fmt(m.cost)}</td><td style="color:var(--ok)">₪${fmt(m.win)}</td><td style="color:${net>=0?'var(--ok)':'var(--er)'}">₪${fmt(net)}</td><td style="color:var(--ac)">₪${fmt(m.charity)}</td></tr>`;});
+    html+='</table></div>';
+  }
+  // backup button in dashboard
+  html+=`<div style="margin-top:12px"><button class="gbtn" onclick="openBackup()" style="width:100%;padding:10px;font-size:.82rem">💾 גיבוי ושחזור</button></div>`;
+  document.getElementById('summaryCard').innerHTML=html;
+}
+
+// ─── HISTORY ──────────────────────────────────────────────────────────────────
+function renderHistory(){
+  populateYearFilter('hYear');populateMonthFilter('hMonth');
+  const yv=document.getElementById('hYear').value;
+  const mv=document.getElementById('hMonth').value;
+  const sv=document.getElementById('hSort').value;
+  let list=getFilteredEntries(yv,mv).slice();
+  if(sv==='date-desc') list.sort((a,b)=>b.date.localeCompare(a.date));
+  else if(sv==='date-asc') list.sort((a,b)=>a.date.localeCompare(b.date));
+  else if(sv==='cost-desc') list.sort((a,b)=>b.totalCost-a.totalCost);
+  else if(sv==='profit-desc') list.sort((a,b)=>b.totalWin-a.totalWin);
+  const container=document.getElementById('historyList');
+  if(!list.length){container.innerHTML='<div class="empty-msg">אין הגרלות</div>';return}
+  const grouped={};
+  list.forEach(e=>{const y=getYear(e.date);const m=getMonth(e.date);const k=y+'-'+m;if(!grouped[k])grouped[k]={year:y,month:m,entries:[]};grouped[k].entries.push(e);});
+  const groupKeys=Object.keys(grouped).sort().reverse();
+  let html='';
+  groupKeys.forEach(k=>{
+    const g=grouped[k];
+    const totCost=g.entries.reduce((s,e)=>s+e.totalCost,0);
+    const totWin=g.entries.reduce((s,e)=>s+e.totalWin,0);
+    const net=totWin-totCost;
+    html+=`<div class="acc-header" onclick="toggleAcc('acc-${k}',this)"><span>${MONTHS_HE[g.month-1]} ${g.year} <span style="color:var(--tx3);font-weight:400;font-size:.78rem">(${g.entries.length} הגרלות)</span></span><div style="display:flex;align-items:center;gap:8px"><span class="badge ${net>=0?'green':'red'}">₪${fmt(net)}</span><span class="acc-arrow">▲</span></div></div>`;
+    html+=`<div class="acc-body open" id="acc-${k}">`;
+    g.entries.forEach(e=>{
+      const net2=e.totalWin-e.totalCost;
+      const hasDrawNums=e.drawNums&&e.drawNums.length===6;
+      const winningRows=e.rows.filter(r=>r.prize>0);
+      html+=`<div class="card" style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div><div style="font-weight:700;font-size:.9rem">${fmtDate(e.date)}${e.drawNum?' · הגרלה #'+e.drawNum:''}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${e.rows.length} שורות</div></div>
+          <div class="badge ${net2>=0?'green':'red'}">נטו ₪${fmt(net2)}</div>
+        </div>`;
+      if(hasDrawNums){
+        html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span style="font-size:.72rem;color:var(--tx2)">שעלו:</span><div class="b-inline">${e.drawNums.map(n=>`<span class="b-sm hit">${n}</span>`).join('')}${e.drawStrong!==null?`<span class="b-sm strong-hit">${e.drawStrong}</span>`:''}</div></div>`;
+      } else {
+        html+=`<div style="margin-bottom:8px"><span class="badge yellow">⏳ ממתין למספרי ההגרלה</span></div>`;
+      }
+      html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="gbtn" onclick="openDetail('${e.id}')" style="font-size:.72rem;padding:5px 10px">🔍 פרטים</button>
+        <button class="gbtn" onclick="openEditDraw('${e.id}')" style="font-size:.72rem;padding:5px 10px">${hasDrawNums?'✏️ עדכן הגרלה':'🎲 הכנס מספרים'}</button>
+        <button class="gbtn" onclick="openDup('${e.id}')" style="font-size:.72rem;padding:5px 10px">📋 שכפל</button>
+        ${winningRows.length>0?`<span class="badge green">🏆 ${winningRows.length} זכיות</span>`:''}
+        <span style="font-size:.72rem;color:var(--er);margin-right:auto">₪${fmt(e.totalCost)}</span>
+        <span style="font-size:.72rem;color:var(--ok)">₪${fmt(e.totalWin)}</span>
+      </div></div>`;
+    });
+    html+=`<div class="card" style="background:var(--sf2);margin-bottom:4px"><div style="display:flex;gap:14px;font-size:.82rem;font-weight:700;flex-wrap:wrap"><span>סה"כ חודש:</span><span style="color:var(--er)">₪${fmt(totCost)}</span><span style="color:var(--ok)">₪${fmt(totWin)}</span><span style="color:${net>=0?'var(--ok)':'var(--er)'}">נטו: ₪${fmt(net)}</span></div></div>`;
+    html+='</div>';
+  });
+  container.innerHTML=html;
+}
+
+// ─── DETAIL MODAL ─────────────────────────────────────────────────────────────
+function openDetail(id){
+  const e=entries.find(x=>x.id==id);if(!e)return;
+  const net=e.totalWin-e.totalCost;
+  const hasDrawNums=e.drawNums&&e.drawNums.length===6;
+  let rowsHTML='';
+  e.rows.forEach((r,i)=>{
+    const numBalls=r.nums.map(n=>`<span class="b-sm ${hasDrawNums&&e.drawNums.includes(n)?'hit':''}">${n}</span>`).join('');
+    const strongBall=r.strong!==null?`<span class="b-sm strong-ball ${r.strongHit?'strong-hit':''}">${r.strong}</span>`:'';
+    rowsHTML+=`<div class="row-card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="row-num" style="position:static;margin:0">שורה ${i+1}</span>${r.prize>0?`<span class="badge green">🏆 ₪${fmt(r.prize)}</span>`:'<span style="font-size:.68rem;color:var(--tx3)">לא זכה</span>'}</div><div class="b-inline">${numBalls}${strongBall}</div></div>`;
+  });
+  document.getElementById('detailModal').innerHTML=`
+    <div class="modal-hdr"><div class="modal-title">🎰 ${fmtDate(e.date)}${e.drawNum?' · הגרלה #'+e.drawNum:''}</div><button class="close-btn" onclick="closeDetail()">✕</button></div>
+    ${hasDrawNums?`<div style="margin-bottom:10px"><div class="balls-label" style="margin-top:0">מספרי ההגרלה שעלו:</div><div class="b-inline" style="margin-top:6px">${e.drawNums.map(n=>`<span class="b-sm hit" style="width:28px;height:28px;font-size:.75rem">${n}</span>`).join('')}${e.drawStrong!==null?`<span class="b-sm strong-hit" style="width:28px;height:28px;font-size:.75rem">${e.drawStrong}</span>`:''}</div></div>`:'<div class="badge yellow" style="margin-bottom:10px">⏳ ממתין למספרי ההגרלה</div>'}
+    <div class="divl"></div>
+    ${rowsHTML}
+    <div class="divl"></div>
+    <div class="kpi-grid"><div class="kpi"><div class="kpi-label">עלות</div><div class="kpi-val red" style="font-size:1.1rem">₪${fmt(e.totalCost)}</div></div><div class="kpi"><div class="kpi-label">רווח</div><div class="kpi-val green" style="font-size:1.1rem">₪${fmt(e.totalWin)}</div></div></div>
+    <div class="kpi-grid"><div class="kpi"><div class="kpi-label">נטו</div><div class="kpi-val ${net>=0?'green':'red'}" style="font-size:1.1rem">₪${fmt(net)}</div></div><div class="kpi"><div class="kpi-label">סה"כ לצדקה</div><div class="kpi-val yellow" style="font-size:1.1rem">₪${fmt(e.totalCharity)}</div></div></div>
+    <div class="card" style="background:var(--sf2);margin-top:4px">
+      <div class="lrow" style="margin-bottom:6px"><span style="font-size:.82rem;color:var(--tx2)">צדקה מטופס (100%)</span><span style="font-weight:700;color:var(--ac2)">₪${fmt(e.charityFromCost)}</span></div>
+      <div class="lrow" style="margin-bottom:0"><span style="font-size:.82rem;color:var(--tx2)">צדקה מרווח (20%)</span><span style="font-weight:700;color:var(--ac4)">₪${fmt(e.charityFromWin)}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="gbtn d" style="flex:1" onclick="deleteEntry(${e.id})">🗑️ מחק</button>
+      <button class="gbtn" style="flex:1" onclick="closeDetail()">סגור</button>
+    </div>`;
+  document.getElementById('detailMov').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailMov').classList.remove('open')}
+async function deleteEntry(id){
+  const ok=await confirmAsync('האם למחוק הגרלה זו?');if(!ok)return;
+  entries=entries.filter(e=>e.id!=id);save();closeDetail();renderHistory();toast('✅ נמחק');
+}
+
+// ─── EDIT DRAW NUMBERS + PRIZES ───────────────────────────────────────────────
+let editDrawId=null;
+let editDrawNums=new Set();
+let editDrawStrong=null;
+
+function openEditDraw(id){
+  const e=entries.find(x=>x.id==id);if(!e)return;
+  editDrawId=id;
+  editDrawNums=new Set(e.drawNums||[]);
+  editDrawStrong=e.drawStrong!==null?e.drawStrong:null;
+
+  let prizeInputs='';
+  e.rows.forEach((r,i)=>{
+    const numBalls=r.nums.map(n=>`<span class="b-sm">${n}</span>`).join('');
+    const strongBall=r.strong!==null?`<span class="b-sm strong-ball">${r.strong}</span>`:'';
+    prizeInputs+=`<div class="row-card" style="margin-bottom:8px">
+      <div class="row-num" style="position:static">שורה ${i+1}</div>
+      <div class="b-inline" style="margin-bottom:8px">${numBalls}${strongBall}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:.8rem;color:var(--tx2);white-space:nowrap">סכום זכייה (₪)</label>
+        <input type="number" id="prize-${i}" value="${r.prize||0}" min="0" style="max-width:120px;padding:8px 10px;font-size:.9rem">
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('editDrawModal').innerHTML=`
+    <div class="modal-hdr"><div class="modal-title">✏️ עדכון מספרי הגרלה</div><button class="close-btn" onclick="closeEditDraw()">✕</button></div>
+    <div style="font-size:.8rem;color:var(--tx2);margin-bottom:10px">${fmtDate(e.date)}${e.drawNum?' · הגרלה #'+e.drawNum:''}</div>
+    <div class="balls-label" style="margin-top:0">סמן 6 מספרים שעלו (1–37):</div>
+    <div class="nums-grid" id="ed-nums37"></div>
+    <div class="balls-label">מספר חזק שעלה (1–7):</div>
+    <div class="nums-grid" id="ed-strong7"></div>
+    <div class="divl"></div>
+    <div class="ct" style="margin-bottom:10px"><span class="ctb green"></span>סכומי זכייה לשורות</div>
+    ${prizeInputs}
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" style="flex:1" onclick="saveEditDraw()">💾 שמור</button>
+      <button class="gbtn" style="flex:1;padding:14px" onclick="closeEditDraw()">ביטול</button>
+    </div>`;
+  document.getElementById('editDrawMov').classList.add('open');
+  buildEditBalls();
+}
+
+function buildEditBalls(){
+  const g37=document.getElementById('ed-nums37');
+  const g7=document.getElementById('ed-strong7');
+  if(!g37||!g7)return;
+  g37.innerHTML='';g7.innerHTML='';
+  for(let i=1;i<=37;i++){
+    const b=document.createElement('div');
+    b.className='num-ball'+(editDrawNums.has(i)?' sel':'');
+    b.textContent=i;
+    b.onclick=()=>{if(editDrawNums.has(i)){editDrawNums.delete(i);b.classList.remove('sel')}else if(editDrawNums.size<6){editDrawNums.add(i);b.classList.add('sel')}else toast('⚠️ עד 6 מספרים','w')};
+    g37.appendChild(b);
+  }
+  for(let i=1;i<=7;i++){
+    const b=document.createElement('div');
+    b.className='num-ball strong'+(editDrawStrong===i?' sel':'');
+    b.textContent=i;
+    b.onclick=()=>{if(editDrawStrong===i){editDrawStrong=null;b.classList.remove('sel')}else{document.querySelectorAll('#ed-strong7 .num-ball').forEach(x=>x.classList.remove('sel'));editDrawStrong=i;b.classList.add('sel');}};
+    g7.appendChild(b);
+  }
+}
+
+function saveEditDraw(){
+  const e=entries.find(x=>x.id==editDrawId);if(!e)return;
+  if(editDrawNums.size>0&&editDrawNums.size!==6){toast('⚠️ סמן 6 מספרים בדיוק','w');return}
+  e.drawNums=[...editDrawNums].sort((a,b)=>a-b);
+  e.drawStrong=editDrawStrong;
+  // read manual prizes
+  e.rows.forEach((r,i)=>{
+    const inp=document.getElementById(`prize-${i}`);
+    if(inp){r.manualPrize=parseFloat(inp.value)||0;}
+  });
+  recalcEntry(e);
+  save();
+  closeEditDraw();
+  renderHistory();
+  toast('✅ עודכן');
+}
+function closeEditDraw(){document.getElementById('editDrawMov').classList.remove('open')}
+
+// ─── DUPLICATE ────────────────────────────────────────────────────────────────
+let dupId=null;
+function openDup(id){
+  dupId=id;
+  document.getElementById('dupDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('dupMov').classList.add('open');
+}
+function closeDup(){document.getElementById('dupMov').classList.remove('open')}
+function confirmDup(){
+  const e=entries.find(x=>x.id==dupId);if(!e)return;
+  const newDate=document.getElementById('dupDate').value;
+  if(!newDate){toast('❌ בחר תאריך','e');return}
+  const newEntry={
+    ...JSON.parse(JSON.stringify(e)),
+    id:Date.now(),
+    date:newDate,
+    drawNums:[],drawStrong:null,
+    rows:e.rows.map(r=>({...r,hits:0,strongHit:false,prize:0,manualPrize:undefined})),
+    totalWin:0,netWin:0,charityFromWin:0,
+    totalCharity:e.charityFromCost
+  };
+  entries.unshift(newEntry);
+  save();
+  closeDup();
+  renderHistory();
+  toast('✅ הכרטיס שוכפל');
+}
+
+// ─── CHARITY ──────────────────────────────────────────────────────────────────
+function renderCharity(){
+  populateYearFilter('cYear');populateMonthFilter('cMonth');
+  const yv=document.getElementById('cYear').value;
+  const mv=document.getElementById('cMonth').value;
+  const list=getFilteredEntries(yv,mv);
+  const totalCharityCost=list.reduce((s,e)=>s+e.charityFromCost,0);
+  const totalCharityWin=list.reduce((s,e)=>s+e.charityFromWin,0);
+  const total=totalCharityCost+totalCharityWin;
+  const months=new Set(list.map(e=>e.date.slice(0,7))).size||1;
+  document.getElementById('charityKpi').innerHTML=`
+    <div class="kpi"><div class="kpi-label">סה"כ לצדקה</div><div class="kpi-val yellow">₪${fmt(total)}</div><div class="kpi-sub">מחויב לתת</div></div>
+    <div class="kpi"><div class="kpi-label">מטפסים (100%)</div><div class="kpi-val blue">₪${fmt(totalCharityCost)}</div></div>
+    <div class="kpi"><div class="kpi-label">מרווחים (20%)</div><div class="kpi-val" style="color:var(--ac4)">₪${fmt(totalCharityWin)}</div></div>
+    <div class="kpi"><div class="kpi-label">ממוצע לחודש</div><div class="kpi-val" style="font-size:1.1rem">₪${fmt(total/months)}</div></div>`;
+  const byMonth={};
+  list.forEach(e=>{const k=e.date.slice(0,7);if(!byMonth[k])byMonth[k]={cost:0,win:0,entries:[]};byMonth[k].cost+=e.charityFromCost;byMonth[k].win+=e.charityFromWin;byMonth[k].entries.push(e);});
+  const keys=Object.keys(byMonth).sort().reverse();
+  let html='';
+  if(!keys.length)html='<div class="empty-msg">אין נתונים</div>';
+  keys.forEach(k=>{
+    const g=byMonth[k];const[y,mo]=k.split('-');const tot=g.cost+g.win;
+    html+=`<div class="acc-header" onclick="toggleAcc('cacc-${k}',this)"><span>${MONTHS_HE[parseInt(mo)-1]} ${y}</span><div style="display:flex;align-items:center;gap:8px"><span class="badge yellow">₪${fmt(tot)}</span><span class="acc-arrow">▲</span></div></div>`;
+    html+=`<div class="acc-body open" id="cacc-${k}"><div class="tbl-wrap"><table><tr><th>תאריך</th><th>מטופס</th><th>מרווח</th><th>סה"כ</th></tr>`;
+    g.entries.forEach(e=>{html+=`<tr><td>${fmtDate(e.date)}</td><td style="color:var(--ac2)">₪${fmt(e.charityFromCost)}</td><td style="color:var(--ac4)">₪${fmt(e.charityFromWin)}</td><td style="font-weight:700;color:var(--ac)">₪${fmt(e.totalCharity)}</td></tr>`;});
+    html+=`<tr style="background:var(--sf2)"><td style="font-weight:700">סה"כ</td><td style="color:var(--ac2);font-weight:700">₪${fmt(g.cost)}</td><td style="color:var(--ac4);font-weight:700">₪${fmt(g.win)}</td><td style="color:var(--ac);font-weight:700">₪${fmt(tot)}</td></tr></table></div></div>`;
+  });
+  document.getElementById('charityList').innerHTML=html;
+}
+
+// ─── ACCORDION ────────────────────────────────────────────────────────────────
+function toggleAcc(id,btn){
+  const body=document.getElementById(id);const arrow=btn.querySelector('.acc-arrow');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  if(arrow)arrow.style.transform=isOpen?'rotate(180deg)':'';
+}
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+function openBackup(){document.getElementById('backupMov').classList.add('open')}
+function closeBackup(){document.getElementById('backupMov').classList.remove('open')}
+
+function exportBackup(){
+  const data=JSON.stringify({version:2,exported:new Date().toISOString(),entries},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`lotto_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ גיבוי יוצא');
+}
+
+async function importBackup(input){
+  const file=input.files[0];if(!file)return;
+  const ok=await confirmAsync('ייבוא יחליף את כל הנתונים הקיימים.\nלהמשיך?');
+  if(!ok){input.value='';return}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const parsed=JSON.parse(ev.target.result);
+      if(Array.isArray(parsed)) entries=parsed;
+      else if(parsed.entries) entries=parsed.entries;
+      else throw new Error('פורמט לא מוכר');
+      save();closeBackup();renderDashboard();
+      toast('✅ גיבוי יובא בהצלחה');
+    }catch(e){toast('❌ שגיאה בקובץ הגיבוי','e');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function(){
+  // הסתר כפתור install אם כבר מותקן
+  const installed=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(installed){const b=document.getElementById('installBtn');if(b)b.style.display='none';}
+})();
+load();initAddForm();renderDashboard();
+</script>
+</body>
+</html>
