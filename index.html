@@ -763,6 +763,13 @@ async function importBackup(input){
   reader.readAsText(file);
 }
 
+// ─── SERVICE WORKER ───────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 (function(){
   // הסתר כפתור install אם כבר מותקן
