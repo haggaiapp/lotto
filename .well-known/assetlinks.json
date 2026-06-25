@@ -1,0 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.haggaiapp.twa",
+        "sha256_cert_fingerprints": ["5F:8D:40:D2:83:FC:22:94:EF:F2:40:7D:B3:8D:7E:D2:40:66:4A:AE:12:DD:96:E5:47:64:BD:15:27:D2:6B:32"]
+      }
+    }]
+
